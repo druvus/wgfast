@@ -32,11 +32,6 @@ except:
     sys.exit()
 
 
-GATK_PATH=WGFAST_PATH+"/bin/GenomeAnalysisTK.jar"
-ADD_GROUPS=WGFAST_PATH+"/bin/AddOrReplaceReadGroups.jar"
-TRIM_PATH=WGFAST_PATH+"/bin/trimmomatic-0.30.jar"
-
-
 def main(matrix,tree,reference,directory,parameters,processors,coverage,proportion,keep,subsample,
     subnums,doc,tmp_dir,insertion_method,fudge,only_subs,model,trim,gatk_method):
     ref_path=os.path.abspath("%s" % reference)
@@ -127,7 +122,7 @@ def main(matrix,tree,reference,directory,parameters,processors,coverage,proporti
     else:
         fileSets=read_file_sets(dir_path)
         ref_coords = get_all_snps(matrix)
-        run_loop(fileSets, dir_path,"%s/scratch/reference.fasta" % ap , processors, GATK_PATH, ref_coords,
+        run_loop(fileSets, dir_path,"%s/scratch/reference.fasta" % ap , processors, ref_coords,
         coverage, proportion, matrix, ap,doc,tmp_dir,WGFAST_PATH,trim,gatk_method)
     """will subsample based on the number of SNPs reported by the following function"""
     used_snps=find_used_snps()

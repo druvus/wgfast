@@ -184,7 +184,7 @@ def get_sequence_length(fastq_in):
         head = list(islice(file, 2))
     return len(head[1])
 
-def run_loop(fileSets, dir_path, reference, processors, gatk, ref_coords, coverage, proportion,
+def run_loop(fileSets, dir_path, reference, processors, ref_coords, coverage, proportion,
     matrix,ap,doc,tmp_dir,wgfast_path,trim,gatk_method):
     files_and_temp_names = [(str(idx), list(f)) for idx, f in fileSets.iteritems()]
     lock = threading.Lock()
@@ -263,7 +263,7 @@ def run_loop(fileSets, dir_path, reference, processors, gatk, ref_coords, covera
             if "T" == doc:
                 lock.acquire()
                 os.system("echo %s_renamed_header.bam > %s.bam.list" % (idx,idx))
-                os.system("java -Djava.io.tmpdir=%s -jar %s -R %s/scratch/reference.fasta -T DepthOfCoverage -o %s_coverage -I %s.bam.list -rf BadCigar > /dev/null 2>&1" % (tmp_dir,gatk,ap,idx,idx))
+                os.system("gatk -R %s/scratch/reference.fasta -T DepthOfCoverage -o %s_coverage -I %s.bam.list -rf BadCigar > /dev/null 2>&1" % (ap,idx,idx))
                 lock.release()
                 process_coverage(idx)
             else:
@@ -312,7 +312,7 @@ def process_sam(in_sam, name):
 
 def run_gatk(reference, processors, name, gatk, tmp_dir, gatk_method):
     """gatk controller, mbq used to be set to 17, but was recently changed - untested, system call"""
-    args = ['java', '-Djava.io.tmpdir=%s' % tmp_dir, '-jar', '%s' % gatk, '-T', 'UnifiedGenotyper',
+    args = ['gatk', '-T', 'UnifiedGenotyper',
             '-R', '%s' % reference, '-nt', '%s' % processors, '-S', 'silent',
             '-ploidy', '1', '-out_mode', '%s' % gatk_method,
             '-stand_call_conf', '30', '-stand_emit_conf', '30', '-I', '%s_renamed_header.bam' % name,
