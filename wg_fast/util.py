@@ -259,7 +259,7 @@ def run_loop(fileSets, dir_path, reference, processors, ref_coords, coverage, pr
                 """inserts read group information, required by new versions of GATK"""
                 os.system("picard AddOrReplaceReadGroups INPUT=%s.bam OUTPUT=%s_renamed_header.bam SORT_ORDER=coordinate RGID=%s RGLB=%s RGPL=illumina RGSM=%s RGPU=name CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT > /dev/null 2>&1" % (idx,idx,idx,idx,idx))
                 os.system("samtools index %s_renamed_header.bam > /dev/null 2>&1" % idx)
-            run_gatk(reference, processors, idx, gatk, tmp_dir, gatk_method)
+            run_gatk(reference, processors, idx, tmp_dir, gatk_method)
             if "T" == doc:
                 lock.acquire()
                 os.system("echo %s_renamed_header.bam > %s.bam.list" % (idx,idx))
@@ -310,7 +310,7 @@ def process_sam(in_sam, name):
     subprocess.check_call("samtools index %s.bam > /dev/null 2>&1" % name, shell=True)
     subprocess.check_call("rm %s.1.bam %s.2.bam %s.3.bam %s" % (name, name, name, in_sam), shell=True)
 
-def run_gatk(reference, processors, name, gatk, tmp_dir, gatk_method):
+def run_gatk(reference, processors, name, tmp_dir, gatk_method):
     """gatk controller, mbq used to be set to 17, but was recently changed - untested, system call"""
     args = ['gatk', '-T', 'UnifiedGenotyper',
             '-R', '%s' % reference, '-nt', '%s' % processors, '-S', 'silent',
