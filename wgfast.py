@@ -128,7 +128,7 @@ def main(matrix,tree,reference,directory,parameters,processors,coverage,proporti
         fileSets=read_file_sets(dir_path)
         ref_coords = get_all_snps(matrix)
         run_loop(fileSets, dir_path,"%s/scratch/reference.fasta" % ap , processors, GATK_PATH, ref_coords,
-        coverage, proportion, matrix, ap,doc,tmp_dir,ADD_GROUPS,TRIM_PATH,WGFAST_PATH,trim,gatk_method)
+        coverage, proportion, matrix, ap,doc,tmp_dir,WGFAST_PATH,trim,gatk_method)
     """will subsample based on the number of SNPs reported by the following function"""
     used_snps=find_used_snps()
     #Outnames is required for the sub-sampling routine, even with -y T

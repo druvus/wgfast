@@ -185,7 +185,7 @@ def get_sequence_length(fastq_in):
     return len(head[1])
 
 def run_loop(fileSets, dir_path, reference, processors, gatk, ref_coords, coverage, proportion,
-    matrix,ap,doc,tmp_dir,picard,trim_path,wgfast_path,trim,gatk_method):
+    matrix,ap,doc,tmp_dir,wgfast_path,trim,gatk_method):
     files_and_temp_names = [(str(idx), list(f)) for idx, f in fileSets.iteritems()]
     lock = threading.Lock()
     def _perform_workflow(data):
@@ -197,7 +197,7 @@ def run_loop(fileSets, dir_path, reference, processors, gatk, ref_coords, covera
             if len(f)>1:
                 if "T" in trim:
                     """paired end sequences - Hardcoded the number of processors per job to 2"""
-                    args=['java','-jar','%s' % trim_path,'PE', '-threads', '2',
+                    args=['trimmomatic', 'PE', '-threads', '2',
                           '%s' % f[0], '%s' % f[1], '%s.F.paired.fastq.gz' % idx, 'F.unpaired.fastq.gz',
 	                  '%s.R.paired.fastq.gz' % idx, 'R.unpaired.fastq.gz', 'ILLUMINACLIP:%s/bin/illumina_adapters_all.fasta:4:30:10:1:true' % wgfast_path,
 	                  'MINLEN:%s' % int(get_sequence_length(f[0])/2)]
@@ -227,7 +227,7 @@ def run_loop(fileSets, dir_path, reference, processors, gatk, ref_coords, covera
             else:
                 if "T" in trim:
                     """single end support"""
-                    args=['java','-jar','%s' % trim_path,'SE', '-threads', '2',
+                    args=['trimmomatic', 'SE', '-threads', '2',
                           '%s' % f[0], '%s.single.fastq.gz' % idx, 'ILLUMINACLIP:%s/bin/illumina_adapters_all.fasta:2:30:10' % wgfast_path,
 	                  'MINLEN:%s' % int(get_sequence_length(f[0])/2)]
                     try:
@@ -257,7 +257,7 @@ def run_loop(fileSets, dir_path, reference, processors, gatk, ref_coords, covera
             else:
                 process_sam("%s.sam" % idx, idx)
                 """inserts read group information, required by new versions of GATK"""
-                os.system("java -jar %s INPUT=%s.bam OUTPUT=%s_renamed_header.bam SORT_ORDER=coordinate RGID=%s RGLB=%s RGPL=illumina RGSM=%s RGPU=name CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT > /dev/null 2>&1" % (picard,idx,idx,idx,idx,idx))
+                os.system("picard AddOrReplaceReadGroups INPUT=%s.bam OUTPUT=%s_renamed_header.bam SORT_ORDER=coordinate RGID=%s RGLB=%s RGPL=illumina RGSM=%s RGPU=name CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT > /dev/null 2>&1" % (idx,idx,idx,idx,idx))
                 os.system("samtools index %s_renamed_header.bam > /dev/null 2>&1" % idx)
             run_gatk(reference, processors, idx, gatk, tmp_dir, gatk_method)
             if "T" == doc:
