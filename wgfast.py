@@ -17,7 +17,7 @@ import glob
 
 
 """modify line below to reflect your installation directory"""
-WGFAST_PATH="/Users/jasonsahl/tools/wgfast"
+WGFAST_PATH="/mnt/powervault/andrsjod/git_code/wgfast"
 
 if os.path.exists(WGFAST_PATH):
     sys.path.append("%s" % WGFAST_PATH)
@@ -33,7 +33,6 @@ except:
 
 
 GATK_PATH=WGFAST_PATH+"/bin/GenomeAnalysisTK.jar"
-PICARD_PATH=WGFAST_PATH+"/bin/CreateSequenceDictionary.jar"
 ADD_GROUPS=WGFAST_PATH+"/bin/AddOrReplaceReadGroups.jar"
 TRIM_PATH=WGFAST_PATH+"/bin/trimmomatic-0.30.jar"
 
@@ -114,7 +113,7 @@ def main(matrix,tree,reference,directory,parameters,processors,coverage,proporti
         #write reduced matrix with only the SNP data"""
         """creates dict file with picard tools.  In testing, GATK does this incorrectly"""
         try:
-            os.system("java -jar %s R=%s/scratch/reference.fasta O=%s/scratch/reference.dict > /dev/null 2>&1" % (PICARD_PATH, ap, ap))
+            os.system("picard CreateSequenceDictionary R=%s/scratch/reference.fasta O=%s/scratch/reference.dict > /dev/null 2>&1" % (ap, ap))
         except:
             print "dict wasn't created"
             sys.exit()
