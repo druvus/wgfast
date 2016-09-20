@@ -23,5 +23,8 @@ setup(name='wg_fast',
       maintainer=__maintainer__,
       maintainer_email=__email__,
       packages=['wg_fast'],
-      long_description=long_description
+      package_data = {'wg_fast': ['data/*.fasta']},
+      long_description=long_description,
+      scripts = ['wgfast.py'],
+      data_files=[('', ['wg_fast/data/illumina_adapters_all.fasta'])]
 )

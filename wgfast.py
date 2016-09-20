@@ -17,7 +17,7 @@ import glob
 
 
 """modify line below to reflect your installation directory"""
-WGFAST_PATH="/Users/jasonsahl/tools/wgfast"
+WGFAST_PATH=os.path.abspath(__file__)
 
 if os.path.exists(WGFAST_PATH):
     sys.path.append("%s" % WGFAST_PATH)

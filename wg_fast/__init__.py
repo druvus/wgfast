@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 __author__ = "Jason Sahl"
 __credits__ = ["Jason Sahl"]
 __license__ = "GPL"
