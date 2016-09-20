@@ -25,6 +25,6 @@ setup(name='wg_fast',
       packages=['wg_fast'],
       package_data = {'wg_fast': ['data/*.fasta']},
       long_description=long_description,
-      scripts = ['wgfast.py'],
+      scripts = ['wgfast.py', 'bin/AddOrReplaceReadGroups.jar', 'bin/bwa', 'bin/CreateSequenceDictionary.jar', 'bin/samtools', 'bin/trimmomatic-0.30.jar'],
       data_files=[('', ['wg_fast/data/illumina_adapters_all.fasta'])]
 )
