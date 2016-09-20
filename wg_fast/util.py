@@ -13,7 +13,7 @@ except:
     sys.exit()
 try:
     import dendropy
-    from dendropy import treecalc
+    from dendropy.calculate import treemeasure
 except:
     print "dendropy is not installed, but needs to be"
     sys.exit()
@@ -28,6 +28,8 @@ from operator import itemgetter
 import threading
 import collections
 import random
+
+_ROOT = os.path.abspath(os.path.dirname(__file__))
 
 def test_file(option, opt_str, value, parser):
     try:
@@ -184,6 +186,9 @@ def get_sequence_length(fastq_in):
         head = list(islice(file, 2))
     return len(head[1])
 
+def get_illumina_adapters(path):
+    return os.path.join(_ROOT, 'data', path)
+
 def run_loop(fileSets, dir_path, reference, processors, gatk, ref_coords, coverage, proportion,
     matrix,ap,doc,tmp_dir,picard,trim_path,wgfast_path,trim,gatk_method):
     files_and_temp_names = [(str(idx), list(f)) for idx, f in fileSets.iteritems()]
@@ -197,9 +202,11 @@ def run_loop(fileSets, dir_path, reference, processors, gatk, ref_coords, covera
             if len(f)>1:
                 if "T" in trim:
                     """paired end sequences - Hardcoded the number of processors per job to 2"""
+                    illmn_adpt = get_illumina_adapters('illumina_adapters_all.fasta')
+                    print(illmn_adpt)
                     args=['java','-jar','%s' % trim_path,'PE', '-threads', '2',
                           '%s' % f[0], '%s' % f[1], '%s.F.paired.fastq.gz' % idx, 'F.unpaired.fastq.gz',
-	                  '%s.R.paired.fastq.gz' % idx, 'R.unpaired.fastq.gz', 'ILLUMINACLIP:%s/bin/illumina_adapters_all.fasta:4:30:10:1:true' % wgfast_path,
+	                  '%s.R.paired.fastq.gz' % idx, 'R.unpaired.fastq.gz', 'ILLUMINACLIP:%s:4:30:10:1:true' % illmn_adpt,
 	                  'MINLEN:%s' % int(get_sequence_length(f[0])/2)]
                     try:
                         vcf_fh = open('%s.trimmomatic.out' % idx, 'w')
@@ -227,8 +234,9 @@ def run_loop(fileSets, dir_path, reference, processors, gatk, ref_coords, covera
             else:
                 if "T" in trim:
                     """single end support"""
+                    illmn_adpt = get_illumina_adapters('illumina_adapters_all.fasta')
                     args=['java','-jar','%s' % trim_path,'SE', '-threads', '2',
-                          '%s' % f[0], '%s.single.fastq.gz' % idx, 'ILLUMINACLIP:%s/bin/illumina_adapters_all.fasta:2:30:10' % wgfast_path,
+                          '%s' % f[0], '%s.single.fastq.gz' % idx, 'ILLUMINACLIP:%s:2:30:10' % illmn_adpt,
 	                  'MINLEN:%s' % int(get_sequence_length(f[0])/2)]
                     try:
                         vcf_fh = open('%s.trimmomatic.out' % idx, 'w')
@@ -880,14 +888,14 @@ def calculate_pairwise_tree_dists(intree, output):
     """uses dendropy function to calculate all pairwise distances between tree - tested"""
     tree = dendropy.Tree.get_from_path(intree, "newick", preserve_underscores=True)
     outfile = open("%s" % output, "w")
-    distances = treecalc.PatristicDistanceMatrix(tree)
+    distances = treemeasure.PatristicDistanceMatrix(tree)
     distances_sets = [ ]
-    for i, t1 in enumerate(tree.taxon_set):
-        for t2 in tree.taxon_set[i+1:]:
+    for i, t1 in enumerate(tree.taxon_namespace):
+        for t2 in tree.taxon_namespace[i+1:]:
             distances_sets.append(distances(t1, t2))
     try:
-        for i, t1 in enumerate(tree.taxon_set):
-            for t2 in tree.taxon_set[i+1:]:
+        for i, t1 in enumerate(tree.taxon_namespace):
+            for t2 in tree.taxon_namespace[i+1:]:
                 print >> outfile, "Distance between '%s' and '%s': %s" % (t1.label, t2.label, distances(t1, t2))
     except:
         print "problem iterating through tree.  Tree is empty or not Newick format"
@@ -1129,3 +1137,5 @@ def create_merged_vcf():
     for x in test:
         print >> out_file, "\t".join(x)
     out_file.close()
+
+print(get_illumina_adapters('illumina_adapters_all.fasta'))
